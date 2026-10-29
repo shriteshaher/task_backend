@@ -14,33 +14,48 @@ export interface MappedError {
   errors?: FieldError[];
 }
 
-type ErrorClass<E extends Error> = abstract new (...args: never[]) => E;
-type ErrorMapper = (err: Error) => MappedError;
-
-const entry = <E extends Error>(
-  errorClass: ErrorClass<E>,
-  mapper: (err: E) => MappedError
-): [ErrorClass<Error>, ErrorMapper] => [errorClass, (err) => mapper(err as E)];
+interface ErrorRule {
+  errorClass: abstract new (...args: never[]) => Error;
+  toResponse: (err: Error) => MappedError;
+}
 
 const fieldErrors = (err: ValidationError): FieldError[] =>
   err.errors.map((item) => ({ field: item.path, message: item.message }));
 
-// The most specific class in an error's prototype chain wins, so entry order does not matter.
-const errorMap = new Map<ErrorClass<Error>, ErrorMapper>([
-  entry(UniqueConstraintError, (err) => ({ statusCode: 409, message: 'Already exists', errors: fieldErrors(err) })),
-  entry(ValidationError, (err) => ({ statusCode: 400, message: 'Validation failed', errors: fieldErrors(err) })),
-  entry(ForeignKeyConstraintError, () => ({ statusCode: 422, message: 'Referenced record does not exist' })),
-  entry(ConnectionError, () => ({ statusCode: 503, message: 'Database unavailable' })),
-  entry(TimeoutError, () => ({ statusCode: 503, message: 'Database timeout' })),
-  entry(DatabaseError, () => ({ statusCode: 500, message: 'Database error' })),
-]);
+// Rules are checked top to bottom and the first match wins.
+// Always put a child class above its parent class, e.g.
+// UniqueConstraintError (extends ValidationError) above ValidationError,
+// ForeignKeyConstraintError / TimeoutError (extend DatabaseError) above DatabaseError.
+const errorRules: ErrorRule[] = [
+  {
+    errorClass: UniqueConstraintError,
+    toResponse: (err) => ({ statusCode: 409, message: 'Already exists', errors: fieldErrors(err as ValidationError) }),
+  },
+  {
+    errorClass: ValidationError,
+    toResponse: (err) => ({ statusCode: 400, message: 'Validation failed', errors: fieldErrors(err as ValidationError) }),
+  },
+  {
+    errorClass: ForeignKeyConstraintError,
+    toResponse: () => ({ statusCode: 422, message: 'Referenced record does not exist' }),
+  },
+  {
+    errorClass: ConnectionError,
+    toResponse: () => ({ statusCode: 503, message: 'Database unavailable' }),
+  },
+  {
+    errorClass: TimeoutError,
+    toResponse: () => ({ statusCode: 503, message: 'Database timeout' }),
+  },
+  {
+    errorClass: DatabaseError,
+    toResponse: () => ({ statusCode: 500, message: 'Database error' }),
+  },
+];
 
 export function mapError(err: unknown): MappedError | undefined {
   if (!(err instanceof Error)) return undefined;
 
-  for (let proto: object | null = Object.getPrototypeOf(err); proto; proto = Object.getPrototypeOf(proto)) {
-    const mapper = errorMap.get(proto.constructor as ErrorClass<Error>);
-    if (mapper) return mapper(err);
-  }
-  return undefined;
+  const rule = errorRules.find((r) => err instanceof r.errorClass);
+  return rule?.toResponse(err);
 }
