@@ -12,10 +12,27 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [{ url: `/api/${env}`, description: env }],
     components: {
+      parameters: {
+        TaskId: {
+          name: 'id',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+        },
+      },
       schemas: {
         CreateTaskRequest: {
           type: 'object',
           required: ['name', 'status_id', 'priority_id'],
+          properties: {
+            name: { type: 'string', example: 'Write documentation' },
+            status_id: { type: 'string', format: 'uuid' },
+            priority_id: { type: 'string', format: 'uuid' },
+          },
+        },
+        UpdateTaskRequest: {
+          type: 'object',
+          minProperties: 1,
           properties: {
             name: { type: 'string', example: 'Write documentation' },
             status_id: { type: 'string', format: 'uuid' },
@@ -39,6 +56,32 @@ const options: swaggerJsdoc.Options = {
             success: { type: 'boolean', example: true },
             message: { type: 'string', example: 'Task created successfully' },
             data: { $ref: '#/components/schemas/Task' },
+          },
+        },
+        TaskListApiResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Tasks fetched successfully' },
+            data: { type: 'array', items: { $ref: '#/components/schemas/Task' } },
+          },
+        },
+        ErrorResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string', example: 'Task not found' },
+            data: { type: 'object', nullable: true, example: null },
+            errors: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  field: { type: 'string', nullable: true },
+                  message: { type: 'string' },
+                },
+              },
+            },
           },
         },
         ValidationError: {

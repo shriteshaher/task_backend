@@ -1,9 +1,11 @@
 import type { RequestHandler } from 'express';
 import type { ZodType } from 'zod';
 
-export const validate = (schema: ZodType): RequestHandler => {
+type RequestSource = 'body' | 'params';
+
+export const validate = (schema: ZodType, source: RequestSource = 'body'): RequestHandler => {
   return (req, res, next) => {
-    const result = schema.safeParse(req.body);
+    const result = schema.safeParse(req[source]);
 
     if (!result.success) {
       res.status(400).json({
@@ -13,7 +15,9 @@ export const validate = (schema: ZodType): RequestHandler => {
       return;
     }
 
-    req.body = result.data;
+    if (source === 'body') {
+      req.body = result.data;
+    }
     next();
   };
 };

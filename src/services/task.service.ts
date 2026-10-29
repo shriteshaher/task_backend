@@ -1,4 +1,7 @@
 import { CreateTaskRequest } from "../dto/CreateTaskRequest.dto";
+import { UpdateTaskRequest } from "../dto/UpdateTaskRequest.dto";
+import { NotFoundError } from "../errors/AppError";
+import { Tasks } from "../model/Tasks.model";
 import { ITaskRepository } from "../repository/intl/task.repository.interface";
 import { taskRepository } from "../repository/task.repository";
 
@@ -9,6 +12,27 @@ class TaskService {
 
     createTask(createTaskRequest: CreateTaskRequest){
       return this.taskRepository.createTask(createTaskRequest)
+    }
+
+    getTasks(): Promise<Tasks[]> {
+      return this.taskRepository.findAll()
+    }
+
+    async getTaskById(id: string): Promise<Tasks> {
+      const task = await this.taskRepository.findById(id)
+      if (!task) throw new NotFoundError('Task not found')
+      return task
+    }
+
+    async updateTask(id: string, updateTaskRequest: UpdateTaskRequest): Promise<Tasks> {
+      const task = await this.taskRepository.updateTask(id, updateTaskRequest)
+      if (!task) throw new NotFoundError('Task not found')
+      return task
+    }
+
+    async deleteTask(id: string): Promise<void> {
+      const deleted = await this.taskRepository.deleteTask(id)
+      if (!deleted) throw new NotFoundError('Task not found')
     }
 }
 
