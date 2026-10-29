@@ -1,8 +1,10 @@
+import { FieldError } from '../types/api-response';
+
 export class AppError extends Error {
   constructor(
     public readonly statusCode: number,
     message: string,
-    public readonly errors?: unknown
+    public readonly errors?: FieldError[]
   ) {
     super(message);
     this.name = new.target.name;
@@ -10,7 +12,7 @@ export class AppError extends Error {
 }
 
 export class BadRequestError extends AppError {
-  constructor(message = 'Bad request', errors?: unknown) {
+  constructor(message = 'Bad request', errors?: FieldError[]) {
     super(400, message, errors);
   }
 }
