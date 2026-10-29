@@ -2,6 +2,9 @@ import 'dotenv/config';
 import http from 'http';
 import { app } from './app';
 import { sequelize } from './config/database';
+import { initModels } from './model';
+
+initModels();
  
 const PORT = Number(process.env.NODE_PORT) || 3000;
 const DB_RETRY_DELAY_MS = 5000;
