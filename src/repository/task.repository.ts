@@ -1,7 +1,10 @@
-import { InferCreationAttributes } from "sequelize";
+import { InferCreationAttributes, Op } from "sequelize";
 import { CreateTaskRequest } from "../dto/CreateTaskRequest.dto";
 import { UpdateTaskRequest } from "../dto/UpdateTaskRequest.dto";
 import { Tasks } from "../model/Tasks.model";
+import { TaskStatus } from "../model/TaskStatus.model";
+import { TaskPriority } from "../model/TaskPriority.model";
+import { TaskFilters } from "../validators/task.validator";
 import { ITaskRepository } from "./intl/task.repository.interface";
 
 class TaskRepository implements ITaskRepository{
@@ -15,8 +18,25 @@ class TaskRepository implements ITaskRepository{
         });
     }
 
-    findAll(): Promise<Tasks[]> {
-        return Tasks.findAll({ order: [['createdAt', 'DESC']] });
+    findAll(filters: TaskFilters): Promise<Tasks[]> {
+        return Tasks.findAll({
+            include: [
+                {
+                    model: TaskStatus,
+                    as: 'status',
+                    required: !!filters.status,
+                    where: filters.status ? { status: filters.status } : undefined,
+                },
+                {
+                    model: TaskPriority,
+                    as: 'priority',
+                    required: !!filters.priority,
+                    where: filters.priority ? { prority: filters.priority } : undefined,
+                },
+            ],
+            where: filters.name ? { name: { [Op.iLike]: `%${filters.name}%` } } : undefined,
+            order: [['createdAt', 'DESC']],
+        });
     }
 
     findById(id: string): Promise<Tasks | null> {

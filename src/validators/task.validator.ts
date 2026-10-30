@@ -14,3 +14,10 @@ export const update_task_schema = task_schema
 export const task_id_schema = z.object({
     id: z.uuidv4()
 })
+
+export const task_filter_schema = z.object({
+    status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']).optional(),
+    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
+    name: z.string().optional(),
+})
+export type TaskFilters = z.infer<typeof task_filter_schema>;

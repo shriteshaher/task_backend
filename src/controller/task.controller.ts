@@ -4,6 +4,7 @@ import { UpdateTaskRequest } from "../dto/UpdateTaskRequest.dto";
 import { Request, Response, NextFunction } from "express";
 import { ApiResponse } from "../types/api-response";
 import { Tasks } from "../model/Tasks.model";
+import { TaskFilters } from "../validators/task.validator";
 
 type TaskIdParams = { id: string };
 
@@ -24,9 +25,9 @@ export const createTask = async (request: Request, response: Response, next: Nex
   }
 };
 
-export const getTasks = async (_request: Request, response: Response, next: NextFunction) => {
+export const getTasks = async (request: Request, response: Response, next: NextFunction) => {
   try {
-    const tasks = await taskService.getTasks();
+    const tasks = await taskService.getTasks(request.query as TaskFilters);
 
     const apiResponse: ApiResponse<Tasks[]> = {
       success: true,

@@ -7,7 +7,7 @@ import {
   Sequelize
 } from 'sequelize';
 
-class TaskPriority  extends Model<InferAttributes<TaskPriority>,InferCreationAttributes<TaskPriority>>{
+export class TaskPriority  extends Model<InferAttributes<TaskPriority>,InferCreationAttributes<TaskPriority>>{
   declare  id:CreationOptional<string>;
   declare  prority : CreationOptional<'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'>;
 }

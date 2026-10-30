@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
-import { task_schema, update_task_schema, task_id_schema } from '../validators/task.validator';
+import { task_schema, update_task_schema, task_id_schema, task_filter_schema } from '../validators/task.validator';
 import { createTask, getTasks, getTaskById, updateTask, deleteTask } from '../controller/task.controller';
 const router=Router()
 
@@ -44,6 +44,24 @@ router.post('/createTask', validate(task_schema), createTask);
  *   get:
  *     summary: Get all tasks (newest first)
  *     tags: [Tasks]
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [TODO, IN_PROGRESS, COMPLETED]
+ *         description: Filter by task status
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [LOW, MEDIUM, HIGH, URGENT]
+ *         description: Filter by task priority
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filter by task name (case-insensitive substring match)
  *     responses:
  *       200:
  *         description: List of tasks
@@ -52,7 +70,7 @@ router.post('/createTask', validate(task_schema), createTask);
  *             schema:
  *               $ref: '#/components/schemas/TaskListApiResponse'
  */
-router.get('/getTasks', getTasks);
+router.get('/getTasks', validate(task_filter_schema, 'query'), getTasks);
 
 /**
  * @openapi

@@ -4,6 +4,7 @@ import { NotFoundError } from "../errors/AppError";
 import { Tasks } from "../model/Tasks.model";
 import { ITaskRepository } from "../repository/intl/task.repository.interface";
 import { taskRepository } from "../repository/task.repository";
+import { TaskFilters } from "../validators/task.validator";
 
 class TaskService {
    constructor(
@@ -14,8 +15,8 @@ class TaskService {
       return this.taskRepository.createTask(createTaskRequest)
     }
 
-    getTasks(): Promise<Tasks[]> {
-      return this.taskRepository.findAll()
+    getTasks(filters: TaskFilters): Promise<Tasks[]> {
+      return this.taskRepository.findAll(filters)
     }
 
     async getTaskById(id: string): Promise<Tasks> {

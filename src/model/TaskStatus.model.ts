@@ -8,7 +8,7 @@ import {
 } from 'sequelize';
 
 
-class TaskStatus extends Model<InferAttributes<TaskStatus>,InferCreationAttributes<TaskStatus>>{
+export class TaskStatus extends Model<InferAttributes<TaskStatus>,InferCreationAttributes<TaskStatus>>{
  declare  id:CreationOptional<string>;
  declare status :CreationOptional<'TODO' | 'IN_PROGRESS' | 'COMPLETED'>
 }
