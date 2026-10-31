@@ -31,13 +31,13 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'sudo docker compose build'
+                sh 'docker compose build'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'sudo docker compose up -d'
+                sh 'docker compose up -d'
             }
         }
 
