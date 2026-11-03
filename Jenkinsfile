@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        DB_HOST = 'your-rds-endpoint.amazonaws.com'
+        DB_HOST = 'database-1.czgwemacg3tk.eu-north-1.rds.amazonaws.com'
         DB_NAME = 'my_app'
         DB_USER = 'postgres'
         DB_PORT = '5432'
