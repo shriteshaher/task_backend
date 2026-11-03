@@ -45,7 +45,7 @@ pipeline {
 
         stage('Build Image') {
     steps {
-        sh 'docker compose build --no-cache app'
+        sh 'docker build -t taskmanagerbe:latest .'
     }
 }
 
@@ -77,6 +77,8 @@ stage('Deploy') {
         failure {
             sh 'docker compose logs --tail=50 || true'
         }
-        
+         always {
+        deleteDir()
+    }
     }
 }
