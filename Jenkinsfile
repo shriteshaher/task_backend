@@ -7,11 +7,11 @@ pipeline {
     }
 
     environment {
+        DB_HOST = 'your-rds-endpoint.amazonaws.com'
         DB_NAME = 'my_app'
-        DB_HOST='database-1.czgwemacg3tk.eu-north-1.rds.amazonaws.com'
         DB_USER = 'postgres'
         DB_PORT = '5432'
-        NODE_ENV = 'development'
+        NODE_ENV = 'production'
         NODE_PORT = '8080'
         APP_PORT = '8080'
         DB_PASSWORD = credentials('db-password')
@@ -27,6 +27,19 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
+            }
+        }
+
+        stage('Download RDS Certificate') {
+            steps {
+                sh '''
+                    mkdir -p certs
+
+                    wget -O certs/global-bundle.pem \
+                    https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+
+                    ls -lh certs/global-bundle.pem
+                '''
             }
         }
 
@@ -52,6 +65,7 @@ pipeline {
                         fi
                         sleep 5
                     done
+
                     echo "app did not become healthy"
                     exit 1
                 '''
