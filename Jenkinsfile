@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         DB_NAME = 'my_app'
+        DB_HOST='database-1.czgwemacg3tk.eu-north-1.rds.amazonaws.com'
         DB_USER = 'postgres'
         DB_PORT = '5432'
         NODE_ENV = 'development'
