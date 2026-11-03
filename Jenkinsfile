@@ -44,16 +44,16 @@ pipeline {
         }
 
         stage('Build Image') {
-            steps {
-                sh 'docker compose build'
-            }
-        }
+    steps {
+        sh 'docker compose build --no-cache app'
+    }
+}
 
-        stage('Deploy') {
-            steps {
-                sh 'docker compose up -d'
-            }
-        }
+stage('Deploy') {
+    steps {
+        sh 'docker compose up -d --force-recreate app'
+    }
+}
 
         stage('Verify') {
             steps {
