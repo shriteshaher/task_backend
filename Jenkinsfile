@@ -77,8 +77,6 @@ pipeline {
         failure {
             sh 'docker compose logs --tail=50 || true'
         }
-        always {
-            deleteDir()
-        }
+        
     }
 }
